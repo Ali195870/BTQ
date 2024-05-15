@@ -867,7 +867,7 @@ class Bot(BaseBot):
             
        
             if tip.amount == 50:
-              if receiver.id== Counter.bot_id":    
+              if receiver.id== Counter.bot_id:    
                  sender_username = sender.username.lower()
                  if sender_username not in self.membership:
                    self.membership[sender_username] = int(time.time()) + 5 * 60 * 60  
