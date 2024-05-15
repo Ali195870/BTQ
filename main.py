@@ -373,9 +373,9 @@ class Bot(BaseBot):
                 await self.highrise.send_whisper(user.id, f"{args[0][1:]} is not in the room.")
                 return
 
-             user_id = next((u.id for u in users if u.username.lower() == args[0][1:].lower()), None)
-             user_name = next((u.username.lower() for u in users if u.username.lower() == args[0][1:].lower()), None)
-             if not user_id:
+            user_id = next((u.id for u in users if u.username.lower() == args[0][1:].lower()), None)
+            user_name = next((u.username.lower() for u in users if u.username.lower() == args[0][1:].lower()), None)
+            if not user_id:
                 await self.highrise.send_whisper(user.id, f"User {args[0][1:]} not found")
                 return                     
              try:
