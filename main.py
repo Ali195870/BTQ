@@ -378,7 +378,7 @@ class Bot(BaseBot):
             if not user_id:
                 await self.highrise.send_whisper(user.id, f"User {args[0][1:]} not found")
                 return                     
-             try:
+            try:
                 if message.lower().startswith("-give") and message.lower().endswith("vip"):   
                   if user.username.lower() in  owners:
                      if user_name.lower() not in self.membership:
@@ -422,7 +422,7 @@ class Bot(BaseBot):
                   if user.username.lower() in self.moderators:
                      await self.highrise.teleport(user_id, Position(16,0,11.5))
               
-             except Exception as e:
+            except Exception as e:
                 print(f"{e}")
          if message.lower().lstrip().startswith(("-emote", "!emote")):
                 await self.highrise.send_whisper(user.id, "\n• Emote can be used by NUMBERS")
