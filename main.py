@@ -17,8 +17,7 @@ from typing import Any, Dict, Union
 from highrise.__main__ import *
 import asyncio, random
 from emotes import Emotes
-from emotes import Dance_Floor
-owners = ['alionardo_','x_softangel_x']
+owners = ['alionardo_','devil_808']
 
 class BotDefinition:
     
@@ -32,7 +31,7 @@ class BotDefinition:
 class Counter:
     bot_id = ""
     static_ctr = 0
-    usernames = ['Alionardo_','x_softangel_x']
+    usernames = ['Alionardo_']
 
 class Bot(BaseBot):
     continuous_emote_tasks: Dict[int, asyncio.Task[Any]] = {}  
@@ -56,21 +55,7 @@ class Bot(BaseBot):
  
         #conversation id var
         self.convo_id_registry = []
-        #dance floor position
-        min_x = 7.5
-        max_x = 11.5
-        min_y = 0.0
-        max_y = 1.0
-        min_z = 8.5
-        max_z = 12.5
-
-        self.dance_floor_pos = [(min_x, max_x, min_y, max_y, min_z, max_z)]
-
-        #dancer variable
-        self.dancer = []
-
-        #dance floor emotes var
-        self.emotesdf = Dance_Floor
+ 
       
     def load_temporary_vips(self):
         try:
@@ -90,7 +75,7 @@ class Bot(BaseBot):
             self.moderators = []
 
         # Add default moderators here
-        default_moderators = ['Alionardo_','Babygirl_Cin']
+        default_moderators = ['Alionardo_']
         for mod in default_moderators:
             if mod.lower() not in self.moderators:
                 self.moderators.append(mod.lower())
@@ -118,33 +103,7 @@ class Bot(BaseBot):
               await self.highrise.chat(user_input)
               await asyncio.sleep(60)
               await self.highrise.send_emote('emote-hello')
-    async def dance_floor(self):
-
-        while True:
-
-            try:
-                if self.dance_floor_pos and self.dancer:
-                    ran = random.randint(1, 73)
-                    emote_text, emote_time = await self.get_emote_df(ran)
-                    emote_time -= 1
-
-                    tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user_id)) for user_id in self.dancer]
-
-                    await asyncio.wait(tasks)
-
-                    await asyncio.sleep(emote_time)
-
-                await asyncio.sleep(1)
-
-            except Exception as e:
-                print(f"{e}")
-    async def get_emote_df(self, target) -> None:
-
-        try:
-            emote_info = self.emotesdf.get(target)
-            return emote_info      
-        except ValueError:
-            pass
+  
     async def on_start(self, session_metadata: SessionMetadata) -> None:
       try:
        
@@ -267,7 +226,136 @@ class Bot(BaseBot):
          user_input = None
          print(f"{user.username} said: {message}")     
          
-         
+         if message.lower().startswith("-announce "):
+           if user.username.lower() in self.moderators:
+             parts = message.split()
+             if len(parts) >= 3:
+                user_input =  message[len("-announce "):]
+                await self.highrise.chat( "Alright i will loop with with intervals of 60 seconds")
+                await self.announce(user_input,message)
+         if  message.lower().startswith("wallet"):
+            if user.username.lower() in self.moderators :
+
+                  wallet = (await self.highrise.get_wallet()).content
+                  await self.highrise.send_whisper(user.id, f"The bot wallet contains {wallet[0].amount} {wallet[0].type}")
+
+            else: 
+                await  self.highrise.send_whisper(user.id, f"Only Moderators Can View the Wallet")       
+         if message.startswith("❤️ all"):
+           if user.username.lower() in self.moderators:
+             roomUsers = (await self.highrise.get_room_users()).content
+             for roomUser, _ in roomUsers:
+                await self.highrise.react("heart", roomUser.id)
+         if message.startswith("!kick"):
+            if user.username.lower() in self.moderators:
+                parts = message.split()
+                if len(parts) < 2:
+                    await self.highrise.chat(user.id, "Usage: !kick @username")
+                    return
+
+                mention = parts[1]
+                username_to_kick = mention.lstrip('@')  # Remove the '@' symbol from the mention
+                response = await self.highrise.get_room_users()
+                users = [content[0] for content in response.content]  # Extract the User objects
+                user_ids = [user.id for user in users]  # Extract the user IDs
+
+                if username_to_kick.lower() in [user.username.lower() for user in users]:
+                    user_index = [user.username.lower() for user in users].index(username_to_kick.lower())
+                    user_id_to_kick = user_ids[user_index]
+                    await self.highrise.moderate_room(user_id_to_kick, "kick")
+                    await self.highrise.chat( f"Kicked {mention}.")
+                else:
+                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
+            else:
+                await self.highrise.send_whisper(user.id, "You can't use this command.")
+
+         elif message.startswith("!mute"):
+            if user.username.lower() in self.moderators:
+                parts = message.split()
+                if len(parts) < 2:
+                    await self.highrise.chat(user.id, "Usage: !mute @username")
+                    return
+
+                mention = parts[1]
+                username_to_mute = mention.lstrip('@')  # Remove the '@' symbol from the mention
+                response = await self.highrise.get_room_users()
+                users = [content[0] for content in response.content]  # Extract the User objects
+                user_ids = [user.id for user in users]  # Extract the user IDs
+
+                if username_to_mute.lower() in [user.username.lower() for user in users]:
+                    user_index = [user.username.lower() for user in users].index(username_to_mute.lower())
+                    user_id_to_mute = user_ids[user_index]
+                    await self.highrise.moderate_room(user_id_to_mute, "mute",3600)  # Mute for 1 hour
+                    await self.highrise.chat(f"Muted {mention} for 1 hour.")
+                else:
+                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
+            else:
+                await self.highrise.send_whisper(user.id, "You can't use this command.")
+
+         elif message.startswith("!unmute"):
+            if user.username.lower() in self.moderators:
+                parts = message.split()
+                if len(parts) < 2:
+                    await self.highrise.chat(user.id, "Usage: !mute @username")
+                    return
+
+                mention = parts[1]
+                username_to_mute = mention.lstrip('@')  # Remove the '@' symbol from the mention
+                response = await self.highrise.get_room_users()
+                users = [content[0] for content in response.content]  # Extract the User objects
+                user_ids = [user.id for user in users]  # Extract the user IDs
+
+                if username_to_mute.lower() in [user.username.lower() for user in users]:
+                    user_index = [user.username.lower() for user in users].index(username_to_mute.lower())
+                    user_id_to_mute = user_ids[user_index]
+                    await self.highrise.moderate_room(user_id_to_mute, "mute",1)  # Mute for 1 hour
+                    await self.highrise.chat(f"{mention} Unmuted.")
+                else:
+                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
+            else:
+                await self.highrise.send_whisper(user.id, "You can't use this command.")
+
+         elif message.startswith("!ban"):
+            if user.username.lower() in self.moderators:
+                parts = message.split()
+                if len(parts) < 2:
+                    await self.highrise.chat(user.id, "Usage: !ban @username")
+                    return
+
+                mention = parts[1]
+                username_to_ban = mention.lstrip('@')  # Remove the '@' symbol from the mention
+                response = await self.highrise.get_room_users()
+                users = [content[0] for content in response.content]  # Extract the User objects
+                user_ids = [user.id for user in users]  # Extract the user IDs
+
+                if username_to_ban.lower() in [user.username.lower() for user in users]:
+                    user_index = [user.username.lower() for user in users].index(username_to_ban.lower())
+                    user_id_to_ban = user_ids[user_index]
+                    await self.highrise.moderate_room(user_id_to_ban, "ban", 3600)  # Ban for 1 hour
+                    await self.highrise.chat(f"Banned {mention} for 1 hour.")
+                else:
+                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
+            else:
+                await self.highrise.send_whisper(user.id, "You can't use this command.")
+
+        
+        
+         if message == "!tip5":
+              if user.username == "Devil_808" :
+                roomUsers = (await self.highrise.get_room_users()).content
+                for roomUser, _ in roomUsers:
+                  await self.highrise.tip_user(roomUser.id, "gold_bar_5")
+              else: 
+                await  self.highrise.send_whisper(user.id, f"Only @Devil_808 can use tip!")
+
+         if message == "!tip1":
+              if user.username == "Devil_808":
+                roomUsers = (await self.highrise.get_room_users()).content
+                for roomUser, _ in roomUsers:
+                  await self.highrise.tip_user(roomUser.id, "gold_bar_1")
+              else: 
+                await  self.highrise.send_whisper(user.id, f"Only the @Devil_808 can use tip!")
+
          if message.lstrip().startswith(("-give","-remove","-here","-tele")):
             response = await self.highrise.get_room_users()
             users = [content[0] for content in response.content]
@@ -285,12 +373,12 @@ class Bot(BaseBot):
                 await self.highrise.send_whisper(user.id, f"{args[0][1:]} is not in the room.")
                 return
 
-            user_id = next((u.id for u in users if u.username.lower() == args[0][1:].lower()), None)
-            user_name = next((u.username.lower() for u in users if u.username.lower() == args[0][1:].lower()), None)
-            if not user_id:
+             user_id = next((u.id for u in users if u.username.lower() == args[0][1:].lower()), None)
+             user_name = next((u.username.lower() for u in users if u.username.lower() == args[0][1:].lower()), None)
+             if not user_id:
                 await self.highrise.send_whisper(user.id, f"User {args[0][1:]} not found")
                 return                     
-            try:
+             try:
                 if message.lower().startswith("-give") and message.lower().endswith("vip"):   
                   if user.username.lower() in  owners:
                      if user_name.lower() not in self.membership:
@@ -321,22 +409,20 @@ class Bot(BaseBot):
                       target_username = user_name
                       if target_username not in owners :
                           await self.teleport_user_next_to(target_username, user)
-                elif message.lower().startswith(('-tele')) and  message.lower().endswith("mod"):   
+                elif message.lower().startswith(('-tele')) and  message.lower().endswith("top"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(18.5, 18.75,0.5))
+                    await self.highrise.teleport(user_id, Position(17.5, 14.75,17.5))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("vip"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(15.5, 15.25,4.5))
+                    await self.highrise.teleport(user_id, Position(16.5, 10.5,12.5))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("dj"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(15,9.5,5.5))
+                    await self.highrise.teleport(user_id, Position(12.5,6.5,10.5))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("g"):   
                   if user.username.lower() in self.moderators:
                      await self.highrise.teleport(user_id, Position(16,0,11.5))
-                elif message.lower().startswith(('-tele')) and  message.lower().endswith("bar"):   
-                  if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(17, 0.0,3.5))
-            except Exception as e:
+              
+             except Exception as e:
                 print(f"{e}")
          if message.lower().lstrip().startswith(("-emote", "!emote")):
                 await self.highrise.send_whisper(user.id, "\n• Emote can be used by NUMBERS")
@@ -353,7 +439,7 @@ class Bot(BaseBot):
         
      
          if message.lower().lstrip().startswith(("-teleport", "!teleport")):
-                    await self.highrise.chat(f"\n • Teleports\n ____________________________\nGround floor : g  \nvip : (vip only), make sure you have 🎫VIP Tickets 🎫 \n• type -buy or !buy for details ")
+                    await self.highrise.chat(f"\n • Teleports\n ____________________________\nGround floor : -g  \n-vip : (vip only)\n-dj : (only mods)\n-top : (only mods), make sure you have 🎫VIP Tickets 🎫 \n• type -buy or !buy for details ")
          if message.lower().lstrip().startswith(("!rules", "-rules")):
                await self.highrise.chat(f"\n\n        RULES\n ____________________________\n 1. NO UNDERAGE \n 2. No advertising\n 3. No hate speech \n 4. No begging (those trash will be immediately banned 🚫) \n 5. No spamming ")
          if message.lower().lstrip().startswith(("-feedback", "!feedback")):
@@ -363,7 +449,56 @@ class Bot(BaseBot):
          if user.username.lower() in self.moderators:
             if message.lower().lstrip().startswith(("-admin list","!admin list")):
                await self.highrise.send_whisper(user.id,"\n  \n•Moderating :\n ____________________________\n !kick @ \n !ban @ \n !mute @ \n !unmute @ ")
-               await self.highrise.send_whisper(user.id,"\n  \n•Teleporting :\n ____________________________\n-tele @ teleport key .\nTeleport keys :\nvip ,dj ,pc ,mod ,bar ,g (for ground)\nExample -tele @username vip \n-here @ :to summon.") 
+               await self.highrise.send_whisper(user.id,"\n  \n•Teleporting :\n ____________________________\n-tele @ teleport key .\nTeleport keys :\nvip ,dj ,top ,g (for ground)\nExample -tele @username vip \n-here @ :to summon.")
+         if message.lstrip().startswith(("!prof","-prof", "!profile", "-profile")) and user.username.lower().startswith:
+              await self.userinfo (user, message) 
+         if message.lower().startswith('-top') :
+           if user.username.lower() in self.moderators:    
+              await self.highrise.teleport(f"{user.id}", Position(17.5, 14.75,17.5))
+            
+         if message.lower().startswith('-vip') :
+           if user.username.lower() in self.moderators or user.username.lower() in self.membership :  
+               await self.highrise.teleport(f"{user.id}", Position(16.5, 10.5,12.5))
+           else:
+             await self.highrise.send_whisper((user.id)," this is a privet place for VIPs , uou can use it by purchaseing VIP Ticket type -buy")
+         if message.lower().startswith('-dj') :
+            if user.username.lower() in self.moderators:    
+              await self.highrise.teleport(f"{user.id}", Position(12.5,6.5,10.5))
+         if message.startswith('-g'):
+             await self.highrise.teleport(f"{user.id}", Position(12.5,0.25,13.5))
+           
+         if message.lower().startswith("loop"):
+           parts = message.split()
+           E = parts[1]
+           E = int(E)
+           emote_text, emote_time = await self.get_emote_E(E)
+           emote_time -= 1
+           user_id = user.id  
+           if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
+              await self.stop_continuous_emote(user.id)
+              task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
+              self.continuous_emote_tasks[user.id] = task
+           else:
+              task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
+              self.continuous_emote_tasks[user.id] = task  
+
+         elif message.lower().startswith("stop"):
+            if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
+                await self.stop_continuous_emote(user.id)
+                await self.highrise.chat("Continuous emote has been stopped.")
+            else:
+                await self.highrise.chat("You don't have an active loop_emote.")
+         elif message.lower().startswith("users"):
+            room_users = (await self.highrise.get_room_users()).content
+            await self.highrise.chat(f"There are {len(room_users)} users in the room")
+ 
+         if  message.isdigit() and 1 <= int(message) <= 91:
+              parts = message.split()
+              E = parts[0]
+              E = int(E)
+              emote_text, emote_time = await self.get_emote_E(E)    
+              tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user.id))]
+              await asyncio.wait(tasks)  
          if message.startswith("/e1"):
                  await self.highrise.set_outfit(outfit=[
           Item(type='clothing', 
@@ -492,136 +627,7 @@ class Bot(BaseBot):
         pass
     async def on_whisper(self, user: User, message: str ) -> None:
      try:
-        if message.lower().startswith("-announce "):
-           if user.username.lower() in self.moderators:
-             parts = message.split()
-             if len(parts) >= 3:
-                user_input =  message[len("-announce "):]
-                await self.highrise.chat( "Alright i will loop with with intervals of 60 seconds")
-                await self.announce(user_input,message)
-        if  message.lower().startswith("wallet"):
-            if user.username.lower() in self.moderators :
-
-                  wallet = (await self.highrise.get_wallet()).content
-                  await self.highrise.send_whisper(user.id, f"The bot wallet contains {wallet[0].amount} {wallet[0].type}")
-
-            else: 
-                await  self.highrise.send_whisper(user.id, f"Only Moderators Can View the Wallet")       
-        if message.startswith("❤️ all"):
-           if user.username.lower() in self.moderators:
-             roomUsers = (await self.highrise.get_room_users()).content
-             for roomUser, _ in roomUsers:
-                await self.highrise.react("heart", roomUser.id)
-        if message.startswith("!kick"):
-            if user.username.lower() in self.moderators:
-                parts = message.split()
-                if len(parts) < 2:
-                    await self.highrise.chat(user.id, "Usage: !kick @username")
-                    return
-
-                mention = parts[1]
-                username_to_kick = mention.lstrip('@')  # Remove the '@' symbol from the mention
-                response = await self.highrise.get_room_users()
-                users = [content[0] for content in response.content]  # Extract the User objects
-                user_ids = [user.id for user in users]  # Extract the user IDs
-
-                if username_to_kick.lower() in [user.username.lower() for user in users]:
-                    user_index = [user.username.lower() for user in users].index(username_to_kick.lower())
-                    user_id_to_kick = user_ids[user_index]
-                    await self.highrise.moderate_room(user_id_to_kick, "kick")
-                    await self.highrise.chat( f"Kicked {mention}.")
-                else:
-                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
-            else:
-                await self.highrise.send_whisper(user.id, "You can't use this command.")
-
-        elif message.startswith("!mute"):
-            if user.username.lower() in self.moderators:
-                parts = message.split()
-                if len(parts) < 2:
-                    await self.highrise.chat(user.id, "Usage: !mute @username")
-                    return
-
-                mention = parts[1]
-                username_to_mute = mention.lstrip('@')  # Remove the '@' symbol from the mention
-                response = await self.highrise.get_room_users()
-                users = [content[0] for content in response.content]  # Extract the User objects
-                user_ids = [user.id for user in users]  # Extract the user IDs
-
-                if username_to_mute.lower() in [user.username.lower() for user in users]:
-                    user_index = [user.username.lower() for user in users].index(username_to_mute.lower())
-                    user_id_to_mute = user_ids[user_index]
-                    await self.highrise.moderate_room(user_id_to_mute, "mute",3600)  # Mute for 1 hour
-                    await self.highrise.chat(f"Muted {mention} for 1 hour.")
-                else:
-                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
-            else:
-                await self.highrise.send_whisper(user.id, "You can't use this command.")
-
-        elif message.startswith("!unmute"):
-            if user.username.lower() in self.moderators:
-                parts = message.split()
-                if len(parts) < 2:
-                    await self.highrise.chat(user.id, "Usage: !mute @username")
-                    return
-
-                mention = parts[1]
-                username_to_mute = mention.lstrip('@')  # Remove the '@' symbol from the mention
-                response = await self.highrise.get_room_users()
-                users = [content[0] for content in response.content]  # Extract the User objects
-                user_ids = [user.id for user in users]  # Extract the user IDs
-
-                if username_to_mute.lower() in [user.username.lower() for user in users]:
-                    user_index = [user.username.lower() for user in users].index(username_to_mute.lower())
-                    user_id_to_mute = user_ids[user_index]
-                    await self.highrise.moderate_room(user_id_to_mute, "mute",1)  # Mute for 1 hour
-                    await self.highrise.chat(f"{mention} Unmuted.")
-                else:
-                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
-            else:
-                await self.highrise.send_whisper(user.id, "You can't use this command.")
-
-        elif message.startswith("!ban"):
-            if user.username.lower() in self.moderators:
-                parts = message.split()
-                if len(parts) < 2:
-                    await self.highrise.chat(user.id, "Usage: !ban @username")
-                    return
-
-                mention = parts[1]
-                username_to_ban = mention.lstrip('@')  # Remove the '@' symbol from the mention
-                response = await self.highrise.get_room_users()
-                users = [content[0] for content in response.content]  # Extract the User objects
-                user_ids = [user.id for user in users]  # Extract the user IDs
-
-                if username_to_ban.lower() in [user.username.lower() for user in users]:
-                    user_index = [user.username.lower() for user in users].index(username_to_ban.lower())
-                    user_id_to_ban = user_ids[user_index]
-                    await self.highrise.moderate_room(user_id_to_ban, "ban", 3600)  # Ban for 1 hour
-                    await self.highrise.chat(f"Banned {mention} for 1 hour.")
-                else:
-                    await self.highrise.send_whisper(user.id, f"User {mention} is not in the room.")
-            else:
-                await self.highrise.send_whisper(user.id, "You can't use this command.")
-
         
-        
-        if message == "!tip5":
-              if user.username == "x_softangel_x" :
-                roomUsers = (await self.highrise.get_room_users()).content
-                for roomUser, _ in roomUsers:
-                  await self.highrise.tip_user(roomUser.id, "gold_bar_5")
-              else: 
-                await  self.highrise.send_whisper(user.id, f"Only @x_softangel_x can use tip!")
-
-        if message == "!tip1":
-              if user.username == "x_softangel_x":
-                roomUsers = (await self.highrise.get_room_users()).content
-                for roomUser, _ in roomUsers:
-                  await self.highrise.tip_user(roomUser.id, "gold_bar_1")
-              else: 
-                await  self.highrise.send_whisper(user.id, f"Only the @x_softangel_x can use tip!")
-
         if message.lower().lstrip().startswith(("-emote", "!emote")):
                 await self.highrise.send_whisper(user.id, "\n• Emote can be used by NUMBERS")
                 await self.highrise.send_whisper(user.id, "\n• For loops say -loop or !loop")         
@@ -791,7 +797,7 @@ class Bot(BaseBot):
               tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user.id))]
               await asyncio.wait(tasks)
         
-        if message == "here":
+        if message == "-here":
             if user.username.lower() in self.moderators:
                 response = await self.highrise.get_room_users()
                 users = [content for content in response.content]
@@ -806,15 +812,15 @@ class Bot(BaseBot):
 
                             pass
        
-        if message.startswith("/say"):
+        if message.startswith("-say"):
             if user.username.lower() in self.moderators:
-                text = message.replace("/say", "").strip()
+                text = message.replace("-say", "").strip()
                 await self.highrise.chat(text)
 
    
          
 
-        elif message.startswith("/come"):
+        elif message.startswith("-come"):
             if user.username.lower() in self.moderators:
                 response = await self.highrise.get_room_users()
                 your_pos = None
@@ -829,15 +835,15 @@ class Bot(BaseBot):
                 await self.highrise.chat(f"@{user.username} I'm coming ..")
                 await self.highrise.walk_to(your_pos)
 
-        elif message.lower().startswith("/follow"):
+        elif message.lower().startswith("-follow"):
          
             target_username = message.split("@")[1].strip()
 
             if target_username.lower() == self.following_username:
                 await self.highrise.send_whisper(user.id,"I am already following.")
-            elif message.startswith("/say"):
+            elif message.startswith("-say"):
               if user.username.lower() in self.moderators:
-                  text = message.replace("/say", "").strip()
+                  text = message.replace("-say", "").strip()
                   await self.highrise.chat(text)
             else:
                 self.following_username = target_username
@@ -860,11 +866,11 @@ class Bot(BaseBot):
 
             
        
-            if tip.amount == 500:
-              if receiver.username  == "M0rdekaiser":    
+            if tip.amount == 50:
+              if receiver.id== Counter.bot_id":    
                  sender_username = sender.username.lower()
                  if sender_username not in self.membership:
-                   self.membership[sender_username] = int(time.time()) + 24 * 60 * 60 *30 
+                   self.membership[sender_username] = int(time.time()) + 5 * 60 * 60  
                    self.save_membership()
                    await self.highrise.chat(f"Thank you {sender_username} for purchasing TRMPORARY vip ticket , now u can use the command vip to teleport to the vip now \nvip: to go vip place🎫 . \n-g:ground floor") 
 
@@ -873,168 +879,7 @@ class Bot(BaseBot):
              print(f"An exception occured: {e}")
 
   
-    async def on_message(self, user_id: str, conversation_id: str, is_new_conversation: bool) -> None:
-      try:
-        _bid = "f12287e3fe78370f402ddaa85cf846b80bef5c62663dfa635147be3ae32dbd36"
-        _id = f"1_on_1:{_bid}:{user_id}"
-        _idx = f"1_on_1:{user_id}:{_bid}"
-        _rid = "65973a6c5ae45c9ac1b5b7ed" 
-        response = await self.highrise.get_messages(conversation_id)
-        if isinstance(response, GetMessagesRequest.GetMessagesResponse):
-            message = response.messages[0].content
-            print (message)
-        if message.lower().lstrip().startswith(("hello","hi","ello")):
-            await asyncio.sleep(2)
-            await self.highrise.send_message(conversation_id, f"Hello dear! ")
-            await asyncio.sleep(2)
-            await self.highrise.send_message(conversation_id, f"for list of commands type list ")
-        if message.lower().startswith('-mod') :
-           if user.username.lower() in self.moderators:    
-              await self.highrise.teleport(f"{user.id}", Position(18.5, 18.75,0.5))
-            
-        if message.lower().startswith('-vip') :
-           if user.username.lower() in self.moderators or user.username.lower() in self.membership :  
-               await self.highrise.teleport(f"{user.id}", Position(15.5, 15.25,4.5))
-           else:
-             await self.highrise.send_message(conversation_id," this is a privet place for VIPs , uou can use it by purchaseing VIP Ticket type -buy")
-        if message.lower().startswith('-dj') :
-            if user.username.lower() in self.moderators:    
-              await self.highrise.teleport(f"{user.id}", Position(15,9.5,5.5))
-        if message.lower().startswith('-bar') :
-            if user.username.lower() in self.moderators:    
-              await self.highrise.teleport(f"{user.id}", Position(17,0,3.5))
-        
-        if message.startswith('-g'):
-             await self.highrise.teleport(f"{user.id}", Position(12.5,0.25,13.5))
-        if message.lower().lstrip().startswith(("-emote", "!emote")):
-                await self.highrise.send_message(conversation_id, "\n• Emote can be used by NUMBERS")
-                await self.highrise.send_message(conversation_id, "\n• For loops say -loop or !loop")         
-        if message.lower().lstrip().startswith(("!loop","-loop")):
-          await self.highrise.send_message(conversation_id,"\n• loops\n ____________________________\nMention loop before the emote numer\n ____________________________")
-          await self.highrise.send_message(conversation_id,"I have sent you details in private chat.")  
-
-        if message.lower().lstrip().startswith(("-list", "!list")):
-                await self.highrise.send_message(conversation_id,"\\commands you can use:\n• !feedback or -feedback \n• !teleport or -teleport\n• !loop or -loop \n• !emote or -emote\n• -buy or !buy for \n 🎫VIP Tickets🎫 ")
-                await self.highrise.send_message(conversation_id,"\n ____________________________\n• !mod or -mod ( only for mods )")
-        if message.lower().lstrip().startswith(("-buy" , "!buy")):
-             await self.highrise.send_message(conversation_id,"\n  vip = 500 per month 🎫 \nTip 50 to bot you will be aceessed to use tele command ")
-        
-     
-        if message.lower().lstrip().startswith(("-teleport", "!teleport")):
-                    await self.highrise.send_message(conversation_id,"\n • Teleports\n ____________________________\nGround floor : g  \nvip : (vip only), make sure you have 🎫VIP Tickets 🎫 \n• type -buy or !buy for details ")
-        if message.lower().lstrip().startswith(("!rules", "-rules")):
-           await self.highrise.send_message(conversation_id,"\n\n        RULES\n ____________________________\n 1. NO UNDERAGE \n 2. No advertising\n 3. No hate speech \n 4. No begging (those trash will be immediately banned 🚫) \n 5. No spamming ")
-        if message.lower().lstrip().startswith(("-feedback", "!feedback")):
-                    await self.highrise.send_message(conversation_id, "• [ Submit Feedback ]\\Thank you for joining our room! \n We value your feedback,")
-                    await self.highrise.send_message(conversation_id,"Please share your feedback/suggestions with @x_softangel_x to improve our environment. Your contributions are valuable and will help us improve.")  
-
-        if user.username.lower() in self.moderators:
-            if message.lower().lstrip().startswith(("-mod","!mod")):
-               await self.highrise.send_message(conversation_id,"\n  \n•Moderating :\n ____________________________\n !kick @ \n !ban @ \n !mute @ \n !unmute @ ")
-               await self.highrise.send_message(conversation_id,"\n  \n•Teleporting :\n ____________________________\n!vip @\n!dj @\n!pc  @\n!bar @\n!g @\nReact : thumb to summon.")
-            
-               
-        if message.lower().startswith("loop"):
-           parts = message.split()
-           E = parts[1]
-           E = int(E)
-           emote_text, emote_time = await self.get_emote_E(E)
-           emote_time -= 1
-           user_id = user.id  
-           if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
-              await self.stop_continuous_emote(user.id)
-              task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
-              self.continuous_emote_tasks[user.id] = task
-           else:
-              task = asyncio.create_task(self.send_continuous_emote(emote_text,user_id,emote_time))
-              self.continuous_emote_tasks[user.id] = task  
-
-        elif message.lower().startswith("stop"):
-            if user.id in self.continuous_emote_tasks and not self.continuous_emote_tasks[user.id].cancelled():
-                await self.stop_continuous_emote(user.id)
-                await self.highrise.send_message(conversation_id,"Continuous emote has been stopped.")
-            else:
-                await self.highrise.send_message(conversation_id,"You don't have an active loop_emote.")
-        elif message.lower().startswith("users"):
-            room_users = (await self.highrise.get_room_users()).content
-            await self.highrise.send_message(conversation_id,f"There are {len(room_users)} users in the room")
-
-        if  message.isdigit() and 1 <= int(message) <= 91:
-              parts = message.split()
-              E = parts[0]
-              E = int(E)
-              emote_text, emote_time = await self.get_emote_E(E)    
-              tasks = [asyncio.create_task(self.highrise.send_emote(emote_text, user.id))]
-              await asyncio.wait(tasks)
-        if message.lstrip().startswith(("!vip","!pc","!dj","!bar","!g")):
-            response = await self.highrise.get_room_users()
-            users = [content[0] for content in response.content]
-            usernames = [user.username.lower() for user in users]
-            parts = message[1:].split()
-            args = parts[1:]
-
-            if len(args) < 1:
-                await self.highrise.send_message(conversation_id, f"usage: !{key[0]} <@Alionardo_>")
-                return
-            elif args[0][0] != "@":
-                await self.highrise.send_message(conversation_id, "Invalid user format. Please use '@username'.")
-                return
-            elif args[0][1:].lower() not in usernames:
-                await self.highrise.send_message(conversation_id, f"{args[0][1:]} is not in the room.")
-                return
-
-            user_id = next((u.id for u in users if u.username.lower() == args[0][1:].lower()), None)
-            user_name = next((u.username.lower() for u in users if u.username.lower() == args[0][1:].lower()), None)
-            if not user_id:
-                await self.highrise.send_message(conversation_id, f"User {args[0][1:]} not found")
-                return                     
-            try:
-                if message.lower().startswith("!mod"):   
-                  if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(18.5, 18.75,0.5))
-                if message.lower().startswith("!vip"):   
-                  if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(15.5, 15.25,4.5))
-                if message.lower().startswith("!dj"):   
-                  if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(15,9.5,5.5))
-                if message.lower().startswith("!g"):   
-                  if user.username.lower() in self.moderators:
-                     await self.highrise.teleport(user_id, Position(16,0,11.5))
-                if message.lower().startswith("!bar"):   
-                  if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(17, 0.0,3.5))
-               
-              
-            except Exception as e:
-             print(f"An exception occurred[Due To {parts[0][1:]}]: {e}")
-      except Exception as e:
-             print(f"An exception occurred[Due To {parts[0][1:]}]: {e}")
-    async def on_user_move(self, user: User, pos: Position | AnchorPosition) -> None:
-      if user:
-        print(f"{user.username}: {pos}")
-
-        if self.dance_floor_pos:
-
-            if isinstance(pos, Position):
-
-                for dance_floor_info in self.dance_floor_pos:
-
-                    if (
-                        dance_floor_info[0] <= pos.x <= dance_floor_info[1] and
-                        dance_floor_info[2] <= pos.y <= dance_floor_info[3] and
-                        dance_floor_info[4] <= pos.z <= dance_floor_info[5]
-                    ):
-
-                        if user.id not in self.dancer:
-                            self.dancer.append(user.id)
-
-                        return
-
-            # If not in any dance floor area
-            if user.id in self.dancer:
-                self.dancer.remove(user.id)
-
+  
 
 
 
