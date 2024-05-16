@@ -382,9 +382,9 @@ class Bot(BaseBot):
                 if message.lower().startswith("-give") and message.lower().endswith("vip"):   
                   if user.username.lower() in owners:
                      if user_name.lower() not in self.membership:
-                        self.membership.append(user_name)
+                        self.membership[user_name] = int(time.time()) + 5 * 60 * 60  
                         self.save_membership()
-                        await self.highrise.chat(f"Congratulations! {user_name}you been given a \n🎫 Permanent vip ticket 🎫 \n ____________________________\nUse the key -vip or -v to teleport")
+                        await self.highrise.chat(f"Congratulations! {user_name}you been given a \n🎫 Party vip ticket 🎫 \n ____________________________\nUse the key -vip  to teleport")
 
                 elif message.lower().startswith("-give") and message.lower().endswith("mod"):   
                   if user.username.lower() in owners :
@@ -449,7 +449,7 @@ class Bot(BaseBot):
          if user.username.lower() in self.moderators:
             if message.lower().lstrip().startswith(("-admin list","!admin list")):
                await self.highrise.send_whisper(user.id,"\n  \n•Moderating :\n ____________________________\n !kick @ \n !ban @ \n !mute @ \n !unmute @ ")
-               await self.highrise.send_whisper(user.id,"\n  \n•Teleporting :\n ____________________________\n-tele @ teleport key .\nTeleport keys :\nvip ,dj ,top ,g (for ground)\nExample -tele @username vip \n-here @ :to summon.")
+               await self.highrise.send_whisper(user.id,"\n  \n•Teleporting :\n ____________________________\n-tele @ teleport key .\nTeleport keys :\nvip ,dj ,top ,g (for ground)\n\nExample -tele @username vip \n\n-here @ :to summon.")
          if message.lstrip().startswith(("!prof","-prof", "!profile", "-profile")) and user.username.lower().startswith:
               await self.userinfo (user, message) 
          if message.lower().startswith('-top') :
@@ -464,7 +464,7 @@ class Bot(BaseBot):
          if message.lower().startswith('-dj') :
             if user.username.lower() in self.moderators:    
               await self.highrise.teleport(f"{user.id}", Position(12.5,6.5,10.5))
-         if message == (("-g","-g ")):
+         if message == "-g" or message == "-g ":
               await self.highrise.teleport(f"{user.id}", Position(0.5,0.25,3.5))
            
          if message.lower().startswith("loop"):
@@ -734,7 +734,7 @@ class Bot(BaseBot):
                 await self.highrise.chat(f"hey {target_username}.")
             
                 await self.follow_user(target_username)
-        elif message.lower() == "stop following":
+        elif message.lower() == "-stop following":
             self.following_username = None
           
             await self.highrise.walk_to(Position(2.5,0.25,4.5,"FrontRight"))
@@ -756,7 +756,7 @@ class Bot(BaseBot):
                  if sender_username not in self.membership:
                    self.membership[sender_username] = int(time.time()) + 5 * 60 * 60  
                    self.save_membership()
-                   await self.highrise.chat(f"Thank you {sender_username} for purchasing TRMPORARY vip ticket , now u can use the command vip to teleport to the vip now \nvip: to go vip place🎫 . \n-g:ground floor") 
+                   await self.highrise.chat(f"Thank you {sender_username} for purchasing TRMPORARY vip ticket , now u can use the command -vip to teleport to the vip now \n-vip: to go vip place🎫 . \n-g:ground floor") 
 
                  
         except Exception as e:
