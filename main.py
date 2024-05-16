@@ -109,7 +109,6 @@ class Bot(BaseBot):
        
         Counter.bot_id = session_metadata.user_id
         print("Ali is booting ...")
-        asyncio.create_task(self.dance_floor())
 
         self.highrise.tg.create_task(self.highrise.walk_to(Position(0.5, 0.25,0.5, facing='FrontRight')))
         self.load_temporary_vips()
