@@ -382,7 +382,7 @@ class Bot(BaseBot):
                 if message.lower().startswith("-give") and message.lower().endswith("vip"):   
                   if user.username.lower() in owners:
                      if user_name.lower() not in self.membership:
-                        self.membership[user_name] = int(time.time()) + 5 * 60 * 60  
+                        self.membership[user_name] = int(time.time()) + 24 * 60 * 60  
                         self.save_membership()
                         await self.highrise.chat(f"Congratulations! {user_name}you been given a \n🎫 Party vip ticket 🎫 \n ____________________________\nUse the key -vip  to teleport")
 
@@ -435,7 +435,7 @@ class Bot(BaseBot):
                 await self.highrise.chat("\\commands you can use:\n• !feedback or -feedback \n• !teleport or -teleport\n• !loop or -loop \n• !emote or -emote\n• -buy or !buy for \n 🎫VIP Tickets🎫 ")
                 await self.highrise.chat(f"\n ____________________________\n• !mod or -mod ( only for mods )")
          if message.lower().lstrip().startswith(("-buy" , "!buy")):
-             await self.highrise.chat(f"\n  vip = 500 per month 🎫 \nTip 50 to bot you will be aceessed to use tele command ")
+             await self.highrise.chat(f"\n  vip = 100 per month 🎫 \nTip 100 to bot you will be aceessed to use vip tele commands. ")
         
      
          if message.lower().lstrip().startswith(("-teleport", "!teleport")):
@@ -750,11 +750,11 @@ class Bot(BaseBot):
 
             
        
-            if tip.amount == 50:
+            if tip.amount == 100:
               if receiver.id== Counter.bot_id:    
                  sender_username = sender.username.lower()
                  if sender_username not in self.membership:
-                   self.membership[sender_username] = int(time.time()) + 5 * 60 * 60  
+                   self.membership[sender_username] = int(time.time()) + 24 * 60 * 60  
                    self.save_membership()
                    await self.highrise.chat(f"Thank you {sender_username} for purchasing TRMPORARY vip ticket , now u can use the command -vip to teleport to the vip now \n-vip: to go vip place🎫 . \n-g:ground floor") 
 
