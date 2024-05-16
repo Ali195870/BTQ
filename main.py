@@ -111,7 +111,7 @@ class Bot(BaseBot):
         print("Ali is booting ...")
         asyncio.create_task(self.dance_floor())
 
-        self.highrise.tg.create_task(self.highrise.walk_to(Position(0.5, 0.025,30.5, facing='FrontRight')))
+        self.highrise.tg.create_task(self.highrise.walk_to(Position(0.5, 0.25,0.5, facing='FrontRight')))
         self.load_temporary_vips()
         await asyncio.sleep(6)
         await self.highrise.chat(f"Deployed ")
@@ -380,7 +380,7 @@ class Bot(BaseBot):
                 return                     
             try:
                 if message.lower().startswith("-give") and message.lower().endswith("vip"):   
-                  if user.username.lower() in  owners:
+                  if user.username.lower() in owners:
                      if user_name.lower() not in self.membership:
                         self.membership.append(user_name)
                         self.save_membership()
@@ -464,9 +464,7 @@ class Bot(BaseBot):
          if message.lower().startswith('-dj') :
             if user.username.lower() in self.moderators:    
               await self.highrise.teleport(f"{user.id}", Position(12.5,6.5,10.5))
-         if message.startswith('-g'):
-            parts = message[1:].split()
-            if len(parts) < 1:
+         if message == (("-g","-g ")):
               await self.highrise.teleport(f"{user.id}", Position(0.5,0.25,3.5))
            
          if message.lower().startswith("loop"):
