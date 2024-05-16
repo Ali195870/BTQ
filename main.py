@@ -110,7 +110,7 @@ class Bot(BaseBot):
         Counter.bot_id = session_metadata.user_id
         print("Ali is booting ...")
 
-        self.highrise.tg.create_task(self.highrise.walk_to(Position(0.5, 0.25,0.5, facing='FrontRight')))
+        await self.highrise.walk_to(Position(0.5, 0.25,0.5, facing='FrontRight'))
         self.load_temporary_vips()
         await asyncio.sleep(6)
         await self.highrise.chat(f"Deployed ")
