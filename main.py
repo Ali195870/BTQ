@@ -232,6 +232,11 @@ class Bot(BaseBot):
                 user_input =  message[len("-announce "):]
                 await self.highrise.chat( "Alright i will loop with with intervals of 60 seconds")
                 await self.announce(user_input,message)
+         if message.lower().startswith("-clear") and user.username.lower() in owners :
+            if user.username.lower() in self.moderators:
+               await self.highrise.chat (f"Announcement message cleared")
+               self.stop_announce()
+               return
          if  message.lower().startswith("wallet"):
             if user.username.lower() in self.moderators :
 
