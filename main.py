@@ -39,10 +39,7 @@ class Bot(BaseBot):
     continuous_emote_task = None
     cooldowns = {}  # Class-level variable to store cooldown timestamps
     emote_looping = False
-    continuous_emote_task = None
-    cooldowns = {}  # Class-level variable to store cooldown timestamps
-    emote_looping = False
-
+    
     def __init__(self):
         super().__init__()
         self.load_membership()
@@ -52,8 +49,8 @@ class Bot(BaseBot):
         self.maze_players = {}
         self.user_points = {}  # Dictionary to store user points
         self.Emotes = Emotes
- 
-        #conversation id var
+        self.should_stop = False
+        self.announce_task = None
         self.convo_id_registry = []
  
       
