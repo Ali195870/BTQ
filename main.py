@@ -220,7 +220,7 @@ class Bot(BaseBot):
     async def on_chat(self, user: User, message: str) -> None:
       try:
          user_input = None
-         print(f"{user.username} said: {message}")     
+    
          
          if message.lower().startswith("-announce "):
            if user.username.lower() in self.moderators:
