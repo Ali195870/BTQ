@@ -17,7 +17,7 @@ from typing import Any, Dict, Union
 from highrise.__main__ import *
 import asyncio, random
 from emotes import Emotes
-owners = ['alionardo_','devil_808']
+owners = ['alionardo_','qtbhaddie']
 
 class BotDefinition:
     
@@ -107,7 +107,7 @@ class Bot(BaseBot):
         Counter.bot_id = session_metadata.user_id
         print("Ali is booting ...")
 
-        await self.highrise.walk_to(Position(0.5, 0.25,0.5, facing='FrontRight'))
+        await self.highrise.walk_to(Position(4, 2,2, facing='FrontLeft'))
         self.load_temporary_vips()
         await asyncio.sleep(6)
         await self.highrise.chat(f"Deployed ")
@@ -120,7 +120,7 @@ class Bot(BaseBot):
 
      try:
 
-        await self.highrise.send_whisper(user.id,f"\n ____________________________\nHello {user.username}\nWelcome to PRH 🐰 DJDEV 💜 TIPS \n• Message or dm or Whisper !list or -list \nto veiw the functions.\n ____________________________\nbot made by @Alionardo_")
+        await self.highrise.send_whisper(user.id,f"\n ____________________________\nHello {user.username}\nWelcome to Seventh ring & Tips\n• Message or dm or Whisper !list or -list \nto veiw the functions.\n ____________________________\nbot made by @Alionardo_")
         await self.highrise.send_emote('emote-salute')
      
      except Exception as e:
@@ -410,18 +410,24 @@ class Bot(BaseBot):
                       target_username = user_name
                       if target_username not in owners :
                           await self.teleport_user_next_to(target_username, user)
-                elif message.lower().startswith(('-tele')) and  message.lower().endswith("top"):   
+                elif message.lower().startswith(('-tele')) and  message.lower().endswith("snake"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(17.5, 14.75,17.5))
+                    await self.highrise.teleport(user_id, Position(12.5, 17.75,0.5))
+                elif message.lower().startswith(('-tele')) and  message.lower().endswith("cage"):   
+                  if user.username.lower() in self.moderators:
+                    await self.highrise.teleport(user_id, Position(17.5, 10.75,27.5))
+                elif message.lower().startswith(('-tele')) and  message.lower().endswith("jail"):   
+                  if user.username.lower() in self.moderators:
+                    await self.highrise.teleport(user_id, Position(17, 11.5,20.5))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("vip"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(16.5, 10.5,12.5))
+                    await self.highrise.teleport(user_id, Position(16.5, 16.5,5.5))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("dj"):   
                   if user.username.lower() in self.moderators:
-                    await self.highrise.teleport(user_id, Position(12.5,6.5,10.5))
+                    await self.highrise.teleport(user_id, Position(11,11.5,6))
                 elif message.lower().startswith(('-tele')) and  message.lower().endswith("g"):   
                   if user.username.lower() in self.moderators:
-                     await self.highrise.teleport(user_id, Position(0.5,0.25,3.5))
+                     await self.highrise.teleport(user_id, Position(9,7,13))
               
             except Exception as e:
                 print(f"{e}")
@@ -453,20 +459,25 @@ class Bot(BaseBot):
                await self.highrise.send_whisper(user.id,"\n  \n•Teleporting :\n ____________________________\n-tele @ teleport key .\nTeleport keys :\nvip ,dj ,top ,g (for ground)\n\nExample -tele @username vip \n\n-here @ :to summon.")
          if message.lstrip().startswith(("!prof","-prof", "!profile", "-profile")) and user.username.lower().startswith:
               await self.userinfo (user, message) 
-         if message.lower().startswith('-top') :
+         if message.lower().startswith('-cage') :
            if user.username.lower() in self.moderators:    
-              await self.highrise.teleport(f"{user.id}", Position(17.5, 14.75,17.5))
-            
+              await self.highrise.teleport(f"{user.id}", Position(17.5, 10.75,27.5))
+         if message.lower().startswith('-jail') :
+           if user.username.lower() in self.moderators:    
+              await self.highrise.teleport(f"{user.id}", Position(17, 11.5,20.5))
+         if message.lower().startswith('-snake') :
+           if user.username.lower() in self.moderators:    
+              await self.highrise.teleport(f"{user.id}", Position(12.5, 17.75,0.5))
          if message.lower().startswith('-vip') :
            if user.username.lower() in self.moderators or user.username.lower() in self.membership :  
-               await self.highrise.teleport(f"{user.id}", Position(16.5, 10.5,12.5))
+               await self.highrise.teleport(f"{user.id}", Position(16.5, 16.5,5.5))
            else:
              await self.highrise.send_whisper((user.id)," this is a privet place for VIPs , uou can use it by purchaseing VIP Ticket type -buy")
          if message.lower().startswith('-dj') :
             if user.username.lower() in self.moderators:    
-              await self.highrise.teleport(f"{user.id}", Position(12.5,6.5,10.5))
+              await self.highrise.teleport(f"{user.id}", Position(11,11.5,6))
          if message == "-g" or message == "-g ":
-              await self.highrise.teleport(f"{user.id}", Position(0.5,0.25,3.5))
+              await self.highrise.teleport(f"{user.id}", Position(9,7,13))
            
          if message.lower().startswith("loop"):
            parts = message.split()
