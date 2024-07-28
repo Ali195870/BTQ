@@ -341,21 +341,28 @@ class Bot(BaseBot):
 
         
         
-         if message == "!tip5":
-              if user.username == "Devil_808" :
+         if message == "-tip 5":
+              if user.username.lower() in owners :
                 roomUsers = (await self.highrise.get_room_users()).content
                 for roomUser, _ in roomUsers:
                   await self.highrise.tip_user(roomUser.id, "gold_bar_5")
               else: 
-                await  self.highrise.send_whisper(user.id, f"Only @Devil_808 can use tip!")
+                await  self.highrise.send_whisper(user.id, f"Only @QTBhaddie can use tip!")
 
-         if message == "!tip1":
-              if user.username == "Devil_808":
+         if message == "-tip 1":
+              if user.username.lower() in owners:
                 roomUsers = (await self.highrise.get_room_users()).content
                 for roomUser, _ in roomUsers:
                   await self.highrise.tip_user(roomUser.id, "gold_bar_1")
               else: 
-                await  self.highrise.send_whisper(user.id, f"Only the @Devil_808 can use tip!")
+                await  self.highrise.send_whisper(user.id, f"Only the @QTBhaddie can use tip!")
+         if message == "-tip 10":
+              if user.username.lower() in owners:
+                roomUsers = (await self.highrise.get_room_users()).content
+                for roomUser, _ in roomUsers:
+                  await self.highrise.tip_user(roomUser.id, "gold_bar_10")
+              else: 
+                await  self.highrise.send_whisper(user.id, f"Only the @QTBhaddie can use tip!")
 
          if message.lstrip().startswith(("-give","-remove","-here","-tele")):
             response = await self.highrise.get_room_users()
